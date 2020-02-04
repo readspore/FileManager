@@ -1,8 +1,13 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+﻿<div class="file-block">
+    <h3>Выберите файл для загрузки</h3>
+    @using (Html.BeginForm("AddFile", "File", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <input type="file" name="uploads" id="uploadFile" multiple="" /><br>
+        <input type="submit" value="Загрузить" id="uploadFileBtn" />
+    }
+    <h3>Все файлы</h3>
+    @*@{await Html.RenderPartialAsync("~/Views/File/_FileManager.cshtml", Model.Files);}*@
+    <button type="button" class="btn btn-primary" data-toggle="modal" onclick="pdFileManager.opentManager();">
+        Файловый менеджер
+    </button>
 </div>
