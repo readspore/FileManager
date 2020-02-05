@@ -13,8 +13,8 @@ namespace FileManager.Controllers
 {
     public class FileController : Controller
     {
-        ApplicationContext db;
-        IWebHostEnvironment _appEnvironment;
+        readonly ApplicationContext db;
+        readonly IWebHostEnvironment _appEnvironment;
         public const string UPLOAD_DIR_PATH = "Files";
         public FileController(ApplicationContext context, IWebHostEnvironment appEnvironment)
         {
@@ -64,17 +64,19 @@ namespace FileManager.Controllers
             {
                 FileModel file = await db.Files.FirstOrDefaultAsync(p => p.Id == id);
                 if (file != null)
-                    return View(file);
+                    return PartialView("_EditFileForm", file);
             }
             return NotFound();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(FileModel file)
+        public async Task<IActionResult> Edit(FileModel newFile)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            db.Files.Update(file);
+            var oldFile = db.Files.FirstOrDefault(f => f.Id == newFile.Id);
+            oldFile.Name = newFile.Name;
+            db.Files.Update(oldFile);
             await db.SaveChangesAsync();
             return Redirect("/Home/Index");
         }
@@ -103,6 +105,11 @@ namespace FileManager.Controllers
         public async Task<JsonResult> ShowFileManager(int page = 1, int perPage = 50)
         {
             return Json(await db.Files.Skip((page - 1) * perPage).Take(perPage).ToListAsync());
+        }
+
+        public ActionResult GetUploadFilesForm()
+        {
+            return PartialView("_UploadFilesForm");
         }
     }
 }

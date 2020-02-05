@@ -1,0 +1,8 @@
+﻿@using (Html.BeginForm("AddFile", "File", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="form-group">
+        <label for="exampleFormControlFile1">Example file input</label>
+        <input type="file" class="form-control-file" name="uploads" id="uploadFile" multiple="" /><br>
+    </div>
+    <button type="submit" class="btn btn-primary mb-2" id="uploadFileBtn" onclick="pdFileManager.uploadFiles(event);">Загрузить</button>
+}

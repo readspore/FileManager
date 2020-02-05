@@ -12,5 +12,6 @@ namespace FileManager.Models
         public string Format { get; set; }
         public string Path { get; set; }
         public string Creation { get; set; }
+        //public string Caption { get; set; }
     }
 }

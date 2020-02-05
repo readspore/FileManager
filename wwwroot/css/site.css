@@ -144,13 +144,13 @@ body {
     max-width: 80% !important;
 }
 
-#pdFileManagerModal .modal-body {
+#pdFileManagerModal .tab-pane {
     display: flex;
     flex-flow: row wrap;
     justify-content: space-between;
 }
 
-    #pdFileManagerModal .modal-body > .img-wrap-1 {
+    #pdFileManagerModal .tab-pane > .img-wrap-1 {
         flex-basis: 21%;
     }
 
@@ -226,3 +226,23 @@ body {
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
+#pdFileManagerModal .active-choosen-file {
+    border: 5px solid green;
+}
+
+#pd-edit {
+    max-width: 500px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#fileManagerNavContent .tab-pane {
+    display: none !important;
+}
+
+    #fileManagerNavContent .tab-pane.active {
+        display: flex !important;
+    }

@@ -29,33 +29,6 @@ function onChildrenTileHover(e) {
     tile.fadeToggle();
 }
 
-$('#uploadFileBtn').on('click', function (e) {
-    return;
-    e.preventDefault();
-    window.ee = e;
-    var files = document.getElementById('uploadFile').files;
-    if (files.length > 0) {
-        if (window.FormData !== undefined) {
-            var data = new FormData(e.target.closest("form"));
-            $.ajax({
-                type: "POST",
-                url: window.location.protocol + '//' + window.location.host + '/File/AddFile',
-                contentType: false,
-                processData: false,
-                data: data,
-                success: function (result) {
-                    alert(result);
-                },
-                error: function (xhr, status, p3) {
-                    alert(xhr.responseText);
-                }
-            });
-        } else {
-            alert("Браузер не поддерживает загрузку файлов HTML5!");
-        }
-    }
-});
-
 var pdFileManager = {
     canLoadMore: true,
     currentPage: 1, //start from 1
@@ -97,6 +70,7 @@ var pdFileManager = {
     opentManager: function (settings) {
         pdFileManager.openingManagerSetting = Object.assign(pdFileManager.openingManagerSetting, settings);
         if (!$('#pdFileManagerModal').length) pdFileManager.createFileManagerModule();
+        pdFileManager.resetAllSelections();
         document.body.dispatchEvent(pdFileManager.events['eBeforeOpen']);
         $('#pdFileManagerModal').modal();
         if (pdFileManager.canLoadMore) {
@@ -113,7 +87,7 @@ var pdFileManager = {
     },
     setFiles: function () {
         if (pdFileManager.data.length === 0)
-            $('#pdFileManagerModal .modal-body').empty();
+            $('#pdFileManagerModal #pd-all-files').empty();
         var appendFilesToManager = () => {
             var i = 0;
             while (i < pdFileManager.perPage && pdFileManager.lastLoadedData.length > i) {
@@ -121,8 +95,8 @@ var pdFileManager = {
                 let htmlStr = `                
                     <div class="img-wrap-1 hover-children-tile__fade-toggle" data-pd-image-id="${file.id}">
                         <div class="hover-tile__fade-toggle f-col" style="display: none;">
-                            <a href="${pdFileManager.controllerURL}/Edit/${file.id}" target="_blank">Редактировать</a>
-                            <a href="${pdFileManager.controllerURL}/Delete/${file.id}">Удалить</a>
+                            <a href="" onclick="pdFileManager.editFileForm(event, ${file.id})">Редактировать</a>
+                            <a href="" onclick="pdFileManager.deleteFile(event, ${file.id})">Удалить</a>
                             <label class="container-chb" >Выбрать
                               <input type="checkbox" name="select-to-choose" onchange="pdFileManager.selectFile(${file.id})">
                               <span class="checkmark"></span>
@@ -138,11 +112,23 @@ var pdFileManager = {
                             <img src="${file.path}">
                         </div>
                     </div>`;
-                $('#pdFileManagerModal .modal-body').append(createElementFromHTML(htmlStr));
+                $('#pdFileManagerModal #pd-all-files').append(createElementFromHTML(htmlStr));
                 $('#pdFileManagerModal .hover-children-tile__fade-toggle:last-child').hover((e) => onChildrenTileHover(e));
                 ++i;
             };
         };
+        setTimeout(() => {
+            if (!$('[data-pd-image-id="fake"]').length) {
+                for (var i = 0; i < 4; i++) {
+                    $('#pdFileManagerModal #pd-all-files')
+                        .append(
+                            createElementFromHTML(
+                                `<div class="img-wrap-1 hover-children-tile__fade-toggle" data-pd-image-id="fake"></div>`
+                            )
+                        );
+                }
+            }
+        }, 100);
         let loadFilesData = new Promise((resolve, reject) => {
             pdFileManager.getFiles(pdFileManager.currentPage, pdFileManager.perPage, resolve);
         });
@@ -150,25 +136,131 @@ var pdFileManager = {
             appendFilesToManager();
         });
     },
+    editFileForm: (e, fileId) => {
+        e.preventDefault();
+        $('#fileManagerNav [href="#pd-edit"]').tab('show');
+        $.ajax({
+            type: "GET",
+            url: pdFileManager.controllerURL + '/Edit/' + fileId,
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                $('#pd-edit').html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    },
+    editFileData: (e, fileId) => {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: pdFileManager.controllerURL + '/Edit/' + fileId,
+            data: {
+                Id: fileId,
+                Name: $("#Name").val()
+            },
+            success: function (response) {
+                //$('#pd-edit').html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    },
+    deleteFile: (e, fileId) => {
+        e.preventDefault();
+        $.ajax({
+            type: "GET",
+            url: pdFileManager.controllerURL + '/Delete/' + fileId,
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            beforeSend: (fileId) => {
+                $(`[data-pd-image-id="${fileId}"]`).addClass('is-processing');
+            },
+            success: function (response) {
+                $(`[data-pd-image-id="${fileId}"]`).addClass('d-none');
+            }
+        });
+    },
+    uploadFiles: (e) => {
+        e.preventDefault();
+        var files = document.getElementById('uploadFile').files;
+        if (files.length > 0) {
+            if (window.FormData !== undefined) {
+                var data = new FormData(e.target.closest("form"));
+                $.ajax({
+                    type: "POST",
+                    url: pdFileManager.controllerURL + '/AddFile',
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function () {
+                        $("#uploadFile").val("");
+                        //$('#pd-all-files').tab('show');
+                        //pdFileManager.canLoadMore = true;
+                        //pdFileManager.loadMore();
+                    },
+                    error: function (xhr, status, p3) {
+                        alert(xhr.responseText);
+                    }
+                });
+            } else {
+                alert("Браузер не поддерживает загрузку файлов HTML5!");
+            }
+        }
+    },
     loadMore: () => {
         pdFileManager.setFiles();
     },
     selectFile: (fileId) => {
         if (!pdFileManager.openingManagerSetting.multiple) {
-            pdFileManager.selectedData.length = 0;
-            $(`[data-pd-image-id] [data-pd-apply-selected]`).addClass('opacity-zero');
-            let isCurrentChecked = $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked');
-            $(`[data-pd-image-id] [name="select-to-choose"]:checkbox`).prop('checked', false);
-            $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked', isCurrentChecked);
+            pdFileManager.resetAllSelections();
         }
         if ($(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked')) {
             pdFileManager.selectedData.push(pdFileManager.data.find(file => file.id == fileId));
             $(`[data-pd-image-id="${fileId}"] [data-pd-apply-selected]`).removeClass('opacity-zero');
+            $(`[data-pd-image-id="${fileId}"]`).addClass('active-choosen-file');
         } else {
             pdFileManager.selectedData = pdFileManager.selectedData.filter(function (fileInfo) {
                 return fileInfo.id !== fileId;
             });
             $(`[data-pd-image-id="${fileId}"] [data-pd-apply-selected]`).addClass('opacity-zero');
+            $(`[data-pd-image-id="${fileId}"]`).removeClass('active-choosen-file');
+        }
+    },
+    resetAllSelections: (fileId = 0) => {
+        pdFileManager.selectedData.length = 0;
+        $(`[data-pd-image-id] [data-pd-apply-selected]`).addClass('opacity-zero');
+        $(`[data-pd-image-id]`).removeClass('active-choosen-file');
+        let isCurrentChecked = $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked');
+        $(`[data-pd-image-id] [name="select-to-choose"]:checkbox`).prop('checked', false);
+        $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked', isCurrentChecked);
+    },
+    showUploadTab: () => {
+        if (!$('#uploadFileBtn').length) {
+            $.ajax({
+                type: "GET",
+                url: pdFileManager.controllerURL + '/GetUploadFilesForm',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (response) {
+                    $('#pd-upload').html(response);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
         }
     },
     createFileManagerModule: () => {
@@ -177,13 +269,53 @@ var pdFileManager = {
               <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                    <ul class="nav nav-pills" id="fileManagerNav" role="tablist">
+                      <li class="nav-item">
+                        <a 
+                            class="nav-link active" 
+                            id="home-tab" 
+                            data-toggle="pill" 
+                            href="#pd-all-files" 
+                            role="tab" 
+                            aria-controls="pd-all-files" 
+                            aria-selected="true"
+                        >Все файлы</a>
+                      </li>
+                      <li class="nav-item">
+                        <a 
+                            class="nav-link" 
+                            id="profile-tab" 
+                            data-toggle="pill" 
+                            href="#pd-upload" 
+                            role="tab" 
+                            aria-controls="pd-upload" 
+                            aria-selected="false"
+                            onclick="pdFileManager.showUploadTab()"
+                        >Загрузить</a>
+                      </li>
+                      <li class="nav-item">
+                        <a 
+                            class="nav-link d-none" 
+                            id="contact-tab" 
+                            data-toggle="pill" 
+                            href="#pd-edit" 
+                            role="tab" 
+                            aria-controls="pd-edit" 
+                            aria-selected="false"
+                        >Редактировать</a>
+                      </li>
+                    </ul>
                     <button type="button" class="btn btn-secondary d-none" data-pd="choose">Выбрать</button>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
                   <div class="modal-body">
+                    <div class="tab-content" id="fileManagerNavContent">
+                      <div class="tab-pane fade show active" id="pd-all-files" role="tabpanel" aria-labelledby="pd-all-files-tab">Loading...</div>
+                      <div class="tab-pane fade" id="pd-upload" role="tabpanel" aria-labelledby="pd-upload-tab">Loading...</div>
+                      <div class="tab-pane fade" id="pd-edit" role="tabpanel" aria-labelledby="pd-edit-tab">...</div>
+                    </div>
                   </div>
                   <div class="modal-footer">
                     <div class="col text-center">
