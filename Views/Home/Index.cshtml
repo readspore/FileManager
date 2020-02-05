@@ -1,4 +1,18 @@
-﻿<div class="file-block">
+﻿@if (User.Identity.IsAuthenticated)
+{
+    <p>@User.Identity.Name</p>
+
+    <form method="post" asp-controller="Account" asp-action="Logout">
+        <input type="submit" value="Выход" />
+    </form>
+}
+else
+{
+    <a asp-controller="Account" asp-action="Login">Вход</a>
+    <a asp-controller="Account" asp-action="Register">Регистрация</a>
+}
+<hr />
+<div class="file-block">
     <h3>Выберите файл для загрузки</h3>
     <button type="button" class="btn btn-primary" data-toggle="modal" onclick="pdFileManager.opentManager();">
         Файловый менеджер

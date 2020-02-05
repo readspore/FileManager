@@ -8,7 +8,7 @@ namespace FileManager.Models
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
-            Database.EnsureDeleted();   // удаляем бд со старой схемой
+            //Database.EnsureDeleted();   // удаляем бд со старой схемой
 
             Database.EnsureCreated();
         }
