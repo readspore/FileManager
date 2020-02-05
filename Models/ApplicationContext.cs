@@ -1,23 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace FileManager.Models
 {
-    public class ApplicationContext : DbContext
+    public class ApplicationContext : IdentityDbContext<User>
     {
-        public DbSet<FileModel> Files { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
-            //Database.EnsureDeleted();   // удаляем бд со старой схемой
-            Database.EnsureCreated();   // создаем бд с новой схемой
+            Database.EnsureDeleted();   // удаляем бд со старой схемой
+
+            Database.EnsureCreated();
         }
-        
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //}
+        public DbSet<FileModel> Files { get; set; }
+
     }
 }
