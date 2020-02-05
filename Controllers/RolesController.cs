@@ -11,12 +11,15 @@ namespace FileManager.Controllers
 {
     public class RolesController : Controller
     {
-        RoleManager<IdentityRole> _roleManager;
-        UserManager<User> _userManager;
-        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+        readonly RoleManager<IdentityRole> _roleManager;
+        readonly UserManager<User> _userManager;
+        readonly SignInManager<User> _signInManager;
+
+        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _roleManager = roleManager;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
         public IActionResult Index() => View(_roleManager.Roles.ToList());
 
@@ -95,6 +98,8 @@ namespace FileManager.Controllers
                 await _userManager.AddToRolesAsync(user, addedRoles);
 
                 await _userManager.RemoveFromRolesAsync(user, removedRoles);
+
+                await _signInManager.RefreshSignInAsync(user);
 
                 return RedirectToAction("UserList");
             }
