@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FileManager.Areas.Admin.Models;
 using FileManager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FileManager.Controllers
+namespace FileManager.Areas.Admin.Controllers
 {
     [Authorize(Roles = "admin")]
     public class FileController : Controller
@@ -112,6 +113,17 @@ namespace FileManager.Controllers
         public ActionResult GetUploadFilesForm()
         {
             return PartialView("_UploadFilesForm");
+        }
+
+        public ActionResult tt()
+        {
+            return Json(new { foo = "bar", method = "get" });
+        }
+
+        [HttpPost]
+        public ActionResult tt(int? id = 0)
+        {
+            return Json(new { foo = "bar", method = "post" });
         }
     }
 }

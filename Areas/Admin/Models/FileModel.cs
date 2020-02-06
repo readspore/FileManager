@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FileManager.Models
+namespace FileManager.Areas.Admin.Models
 {
     public class FileModel
     {

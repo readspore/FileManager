@@ -33,7 +33,7 @@ var pdFileManager = {
     canLoadMore: true,
     currentPage: 1, //start from 1
     perPage: 20,
-    controllerURL: window.location.protocol + '//' + window.location.host + '/File',
+    controllerURL: window.location.protocol + '//' + window.location.host + '/Admin/File',
     lastLoadedData: [],
     data: [],
     selectedData: [],
