@@ -15,6 +15,19 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Admin\Views\File\assets\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\file-manager-assets\css\site.css" />
+    <None Include="wwwroot\file-manager-assets\js\site.js" />
+    <None Include="wwwroot\Files\2020-02\egypt.jpg" />
+    <None Include="wwwroot\Files\2020-02\low-poly.JPG" />
+    <None Include="wwwroot\Files\2020-02\neo-neo-classic.jpg" />
+  </ItemGroup>
+
 
 
 </Project>
