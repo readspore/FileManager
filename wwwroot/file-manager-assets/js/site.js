@@ -41,32 +41,6 @@ var pdFileManager = {
         multiple: true
     },
     events: {},
-    getFiles: (
-        page = pdFileManager.currentPage,
-        perPage = pdFileManager.perPage,
-        resolve = false
-    ) => {
-        $.ajax({
-            type: "POST",
-            url: pdFileManager.controllerURL + '/ShowFileManager?'
-                + 'page=' + page
-                + '&perPage=' + perPage,
-            success: function (result) {
-                pdFileManager.lastLoadedData = result;
-                pdFileManager.data = pdFileManager.data.concat(result);
-                if (result.length < pdFileManager.perPage) {
-                    $('#pdFileManagerLoadMore').css('display', 'none');
-                    pdFileManager.canLoadMore = false;
-                }
-                if (resolve)
-                    resolve();
-                ++pdFileManager.currentPage;
-            },
-            error: function (xhr, status, p3) {
-                alert('get Files error');
-            }
-        });
-    },
     opentManager: function (settings) {
         pdFileManager.openingManagerSetting = Object.assign(pdFileManager.openingManagerSetting, settings);
         if (!$('#pdFileManagerModal').length) pdFileManager.createFileManagerModule();
@@ -135,6 +109,33 @@ var pdFileManager = {
         loadFilesData.then(() => {
             appendFilesToManager();
         });
+    },
+    loadMore: () => {
+        pdFileManager.setFiles();
+    },
+    selectFile: (fileId) => {
+        if (!pdFileManager.openingManagerSetting.multiple) {
+            pdFileManager.resetAllSelections();
+        }
+        if ($(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked')) {
+            pdFileManager.selectedData.push(pdFileManager.data.find(file => file.id == fileId));
+            $(`[data-pd-image-id="${fileId}"] [data-pd-apply-selected]`).removeClass('opacity-zero');
+            $(`[data-pd-image-id="${fileId}"]`).addClass('active-choosen-file');
+        } else {
+            pdFileManager.selectedData = pdFileManager.selectedData.filter(function (fileInfo) {
+                return fileInfo.id !== fileId;
+            });
+            $(`[data-pd-image-id="${fileId}"] [data-pd-apply-selected]`).addClass('opacity-zero');
+            $(`[data-pd-image-id="${fileId}"]`).removeClass('active-choosen-file');
+        }
+    },
+    resetAllSelections: (fileId = 0) => {
+        pdFileManager.selectedData.length = 0;
+        $(`[data-pd-image-id] [data-pd-apply-selected]`).addClass('opacity-zero');
+        $(`[data-pd-image-id]`).removeClass('active-choosen-file');
+        let isCurrentChecked = $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked');
+        $(`[data-pd-image-id] [name="select-to-choose"]:checkbox`).prop('checked', false);
+        $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked', isCurrentChecked);
     },
     editFileForm: (e, fileId) => {
         e.preventDefault();
@@ -217,33 +218,6 @@ var pdFileManager = {
             }
         }
     },
-    loadMore: () => {
-        pdFileManager.setFiles();
-    },
-    selectFile: (fileId) => {
-        if (!pdFileManager.openingManagerSetting.multiple) {
-            pdFileManager.resetAllSelections();
-        }
-        if ($(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked')) {
-            pdFileManager.selectedData.push(pdFileManager.data.find(file => file.id == fileId));
-            $(`[data-pd-image-id="${fileId}"] [data-pd-apply-selected]`).removeClass('opacity-zero');
-            $(`[data-pd-image-id="${fileId}"]`).addClass('active-choosen-file');
-        } else {
-            pdFileManager.selectedData = pdFileManager.selectedData.filter(function (fileInfo) {
-                return fileInfo.id !== fileId;
-            });
-            $(`[data-pd-image-id="${fileId}"] [data-pd-apply-selected]`).addClass('opacity-zero');
-            $(`[data-pd-image-id="${fileId}"]`).removeClass('active-choosen-file');
-        }
-    },
-    resetAllSelections: (fileId = 0) => {
-        pdFileManager.selectedData.length = 0;
-        $(`[data-pd-image-id] [data-pd-apply-selected]`).addClass('opacity-zero');
-        $(`[data-pd-image-id]`).removeClass('active-choosen-file');
-        let isCurrentChecked = $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked');
-        $(`[data-pd-image-id] [name="select-to-choose"]:checkbox`).prop('checked', false);
-        $(`[data-pd-image-id="${fileId}"] [name="select-to-choose"]`).prop('checked', isCurrentChecked);
-    },
     showUploadTab: () => {
         if (!$('#uploadFileBtn').length) {
             $.ajax({
@@ -262,6 +236,32 @@ var pdFileManager = {
                 }
             });
         }
+    },
+    getFiles: (
+        page = pdFileManager.currentPage,
+        perPage = pdFileManager.perPage,
+        resolve = false
+    ) => {
+        $.ajax({
+            type: "POST",
+            url: pdFileManager.controllerURL + '/ShowFileManager?'
+                + 'page=' + page
+                + '&perPage=' + perPage,
+            success: function (result) {
+                pdFileManager.lastLoadedData = result;
+                pdFileManager.data = pdFileManager.data.concat(result);
+                if (result.length < pdFileManager.perPage) {
+                    $('#pdFileManagerLoadMore').css('display', 'none');
+                    pdFileManager.canLoadMore = false;
+                }
+                if (resolve)
+                    resolve();
+                ++pdFileManager.currentPage;
+            },
+            error: function (xhr, status, p3) {
+                alert('get Files error');
+            }
+        });
     },
     createFileManagerModule: () => {
         $('body').append(createElementFromHTML(`
