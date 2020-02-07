@@ -53,7 +53,6 @@ var pdFileManager = {
         document.body.dispatchEvent(pdFileManager.events['eAfterOpen']);
     },
     closeManager: (e) => {
-        console.log(e);
         e.preventDefault();
         document.body.dispatchEvent(pdFileManager.events['eBeforeClose']);
         $('#pdFileManagerModal').modal("hide");
@@ -66,6 +65,7 @@ var pdFileManager = {
             var i = 0;
             while (i < pdFileManager.perPage && pdFileManager.lastLoadedData.length > i) {
                 var file = pdFileManager.lastLoadedData[i];
+
                 let htmlStr = `                
                     <div class="img-wrap-1 hover-children-tile__fade-toggle" data-pd-image-id="${file.id}">
                         <div class="hover-tile__fade-toggle f-col" style="display: none;">
@@ -90,10 +90,9 @@ var pdFileManager = {
                 $('#pdFileManagerModal .hover-children-tile__fade-toggle:last-child').hover((e) => onChildrenTileHover(e));
                 ++i;
             };
-        };
-        setTimeout(() => {
+
             if (!$('[data-pd-image-id="fake"]').length) {
-                for (var i = 0; i < 4; i++) {
+                for (var i = 0; i < 3; i++) {
                     $('#pdFileManagerModal #pd-all-files')
                         .append(
                             createElementFromHTML(
@@ -102,7 +101,19 @@ var pdFileManager = {
                         );
                 }
             }
-        }, 100);
+        };
+        //setTimeout(() => {
+        //    if (!$('[data-pd-image-id="fake"]').length) {
+        //        for (var i = 0; i < 3; i++) {
+        //            $('#pdFileManagerModal #pd-all-files')
+        //                .append(
+        //                    createElementFromHTML(
+        //                        `<div class="img-wrap-1 hover-children-tile__fade-toggle" data-pd-image-id="fake"></div>`
+        //                    )
+        //                );
+        //        }
+        //    }
+        //}, 100);
         let loadFilesData = new Promise((resolve, reject) => {
             pdFileManager.getFiles(pdFileManager.currentPage, pdFileManager.perPage, resolve);
         });
@@ -205,9 +216,13 @@ var pdFileManager = {
                     data: data,
                     success: function () {
                         $("#uploadFile").val("");
-                        //$('#pd-all-files').tab('show');
-                        //pdFileManager.canLoadMore = true;
-                        //pdFileManager.loadMore();
+                        document.querySelector("#uploadFile").files.length;
+                        $('#pdFileManagerModal #pd-all-files').empty();
+                        pdFileManager.canLoadMore = true;
+                        $('#pdFileManagerLoadMore').css('display', 'block');
+                        pdFileManager.data = [];
+                        pdFileManager.currentPage = 1;
+                        pdFileManager.loadMore();
                     },
                     error: function (xhr, status, p3) {
                         alert(xhr.responseText);
@@ -334,7 +349,6 @@ var pdFileManager = {
     }
     /*
      $('body:first').on('eAfterClose', ()=>{
-    console.log(pdFileManager.selectedData)
     })
      */
 };
