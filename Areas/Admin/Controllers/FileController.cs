@@ -107,7 +107,7 @@ namespace FileManager.Areas.Admin.Controllers
         [HttpPost]
         public async Task<JsonResult> ShowFileManager(int page = 1, int perPage = 50)
         {
-            return Json(await db.Files.Skip((page - 1) * perPage).Take(perPage).ToListAsync());
+            return Json(await db.Files.OrderByDescending(f => f.Id).Skip((page - 1) * perPage).Take(perPage).ToListAsync());
         }
 
         public ActionResult GetUploadFilesForm()
