@@ -38,7 +38,8 @@ var pdFileManager = {
     data: [],
     selectedData: [],
     openingManagerSetting: {
-        multiple: true
+        multiple: true,
+        onCloseFunc : null
     },
     events: {},
     opentManager: function (settings) {
@@ -57,6 +58,9 @@ var pdFileManager = {
         document.body.dispatchEvent(pdFileManager.events['eBeforeClose']);
         $('#pdFileManagerModal').modal("hide");
         document.body.dispatchEvent(pdFileManager.events['eAfterClose']);
+        try {
+            pdFileManager.openingManagerSetting.onCloseFunc(pdFileManager.selectedData);
+        } catch (err) { }
     },
     setFiles: function () {
         if (pdFileManager.data.length === 0)
@@ -102,18 +106,6 @@ var pdFileManager = {
                 }
             }
         };
-        //setTimeout(() => {
-        //    if (!$('[data-pd-image-id="fake"]').length) {
-        //        for (var i = 0; i < 3; i++) {
-        //            $('#pdFileManagerModal #pd-all-files')
-        //                .append(
-        //                    createElementFromHTML(
-        //                        `<div class="img-wrap-1 hover-children-tile__fade-toggle" data-pd-image-id="fake"></div>`
-        //                    )
-        //                );
-        //        }
-        //    }
-        //}, 100);
         let loadFilesData = new Promise((resolve, reject) => {
             pdFileManager.getFiles(pdFileManager.currentPage, pdFileManager.perPage, resolve);
         });
