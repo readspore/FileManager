@@ -169,6 +169,7 @@ var pdFileManager = {
                 Name: $("#Name").val()
             },
             success: function (response) {
+                pdFileManager.addMsg("Успешно обновлено");
                 //$('#pd-edit').html(response);
             },
             failure: function (response) {
@@ -275,7 +276,11 @@ var pdFileManager = {
             <div class="modal fade" id="pdFileManagerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
-                  <div class="modal-header">
+                  <div class="modal-header d-flex f-col">
+                    <button type="button" class="btn btn-secondary d-none" data-pd="choose">Выбрать</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
                     <ul class="nav nav-pills" id="fileManagerNav" role="tablist">
                       <li class="nav-item">
                         <a 
@@ -312,10 +317,7 @@ var pdFileManager = {
                         >Редактировать</a>
                       </li>
                     </ul>
-                    <button type="button" class="btn btn-secondary d-none" data-pd="choose">Выбрать</button>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
+                    <div id="pd-file-manager-notices"></div>
                   </div>
                   <div class="modal-body">
                     <div class="tab-content" id="fileManagerNavContent">
@@ -338,9 +340,23 @@ var pdFileManager = {
         pdFileManager.events['eAfterOpen'] = new Event('eAfterOpen');
         pdFileManager.events['eBeforeClose'] = new Event('eBeforeClose');
         pdFileManager.events['eAfterClose'] = new Event('eAfterClose');
-    }
     /*
-     $('body:first').on('eAfterClose', ()=>{
-    })
-     */
+        $('body:first').on('eAfterClose', ()=>{});
+    */
+    },
+    addMsg: (msgText, msgTitle = "Уведомление", msgTitleClass = '') => {
+        let msgHTML = `
+          <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="20000" data-pd-selectro-attr>
+              <div class="toast-header">
+                <strong class="mr-auto ${msgTitleClass}">${msgTitle}</strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="toast-body">${msgText}</div>
+            </div>`;
+        $('#pdFileManagerModal #pd-file-manager-notices').append(createElementFromHTML(msgHTML));
+        $('#pdFileManagerModal #pd-file-manager-notices [data-pd-selectro-attr]').last().toast('show')
+
+    }
 };
