@@ -43,7 +43,8 @@ namespace FileManager.Areas.Admin.Controllers
         {
             string path = "/" + UPLOAD_DIR_PATH + "/" + DateTime.Now.ToString("yyyy-MM");
             System.IO.Directory.CreateDirectory(_appEnvironment.WebRootPath + path);
-            path += "/" + uploadedFile.FileName;
+            path += "/" + GetUniqNameInDir(path, uploadedFile.FileName );
+
 
             // сохраняем файл в папку Files в каталоге wwwroot
             using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
@@ -58,6 +59,30 @@ namespace FileManager.Areas.Admin.Controllers
                 Creation = DateTime.Now.ToString("yyyyMMdd"),
                 Format = new FileInfo(path).Extension
             };
+        }
+
+        private string GetUniqNameInDir(string ditPath, string fileName)
+        {
+            bool nameNotUniq = true;
+            int i = 0;
+            var tmpName = fileName;
+            while (nameNotUniq)
+            {
+                ++i;
+                if (System.IO.File.Exists(_appEnvironment.WebRootPath + ditPath + "/" + tmpName))
+                {
+                    tmpName = fileName.Replace(".", $"{i}.");
+                    tmpName = tmpName == fileName //if fileName not containsumbol . (extention)
+                                ? fileName + i
+                                : tmpName;
+                }
+                else
+                {
+                    nameNotUniq = false;
+                    fileName = tmpName;
+                }
+            }
+            return fileName;
         }
 
         [HttpGet]
