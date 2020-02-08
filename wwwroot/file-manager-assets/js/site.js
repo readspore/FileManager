@@ -287,9 +287,9 @@ var pdFileManager = {
                             class="nav-link active" 
                             id="home-tab" 
                             data-toggle="pill" 
-                            href="#pd-all-files" 
+                            href="#pd-all-files-wrapper" 
                             role="tab" 
-                            aria-controls="pd-all-files" 
+                            aria-controls="pd-all-files-wrapper" 
                             aria-selected="true"
                         >Все файлы</a>
                       </li>
@@ -321,16 +321,20 @@ var pdFileManager = {
                   </div>
                   <div class="modal-body">
                     <div class="tab-content" id="fileManagerNavContent">
-                      <div class="tab-pane fade show active" id="pd-all-files" role="tabpanel" aria-labelledby="pd-all-files-tab">Loading...</div>
+                      <div class="tab-pane fade show active f-col" role="tabpanel" aria-labelledby="pd-all-files-tab" id="pd-all-files-wrapper">
+                          <div id="pd-all-files"></div>
+                          <div class="modal-footer">
+                            <div class="col text-center">
+                              <button type="button" class="btn btn-primary text-center" id="pdFileManagerLoadMore" onclick="pdFileManager.loadMore()">Загрузить еще</button>
+                              <button type="button" class="btn btn-secondary d-none" data-pd="choose">Выбрать</button>
+                            </div>
+                          </div>  
+                      </div>
                       <div class="tab-pane fade" id="pd-upload" role="tabpanel" aria-labelledby="pd-upload-tab">Loading...</div>
                       <div class="tab-pane fade" id="pd-edit" role="tabpanel" aria-labelledby="pd-edit-tab">...</div>
                     </div>
                   </div>
                   <div class="modal-footer">
-                    <div class="col text-center">
-                      <button type="button" class="btn btn-primary text-center" id="pdFileManagerLoadMore" onclick="pdFileManager.loadMore()">Загрузить еще</button>
-                      <button type="button" class="btn btn-secondary d-none" data-pd="choose">Выбрать</button>
-                    </div>
                   </div>
                 </div>
               </div>

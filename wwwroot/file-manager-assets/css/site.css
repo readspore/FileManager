@@ -144,15 +144,19 @@ body {
     max-width: 80% !important;
 }
 
-#pdFileManagerModal .tab-pane {
+#pdFileManagerModal #pd-all-files {
     display: flex;
     flex-flow: row wrap;
     justify-content: space-between;
 }
 
-    #pdFileManagerModal .tab-pane > .img-wrap-1 {
-        flex-basis: 21%;
-    }
+[aria-labelledby="pd-all-files-tab"] .modal-footer {
+    border: none;
+}
+
+#pdFileManagerModal #pd-all-files > .img-wrap-1 {
+    flex-basis: 21%;
+}
 
 #pdFileManagerModal .hover-tile__fade-toggle .f-col {
     display: flex;
