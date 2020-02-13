@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,12 +14,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FileManager.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "admin")]
+    //[Authorize(Roles = "admin")]
     public class FileController : Controller
     {
         readonly ApplicationContext db;
         readonly IWebHostEnvironment _appEnvironment;
         public const string UPLOAD_DIR_PATH = "Files";
+        public readonly Dictionary<string, Size> additionalSizes = new Dictionary<string, Size>(){
+            //{ "100",  new Size(150, 150) },
+            //{ "200",  new Size(200, 200) },
+            { "300",  new Size(300, 300) },
+            { "400",  new Size(400, 400) },
+            //{ "500",  new Size(500, 500) },
+            //{ "600",  new Size(600, 600) },
+            //{ "700",  new Size(700, 700) },
+            //{ "800",  new Size(800, 800) }
+            };
         public FileController(ApplicationContext context, IWebHostEnvironment appEnvironment)
         {
             db = context;
@@ -41,16 +52,17 @@ namespace FileManager.Areas.Admin.Controllers
 
         private async Task<FileModel> SaveTheFile(IFormFile uploadedFile)
         {
-            string path = "/" + UPLOAD_DIR_PATH + "/" + DateTime.Now.ToString("yyyy-MM");
+            string path = "/" + UPLOAD_DIR_PATH + "/" + DateTime.Now.ToString("yyyy-MM") + "/";
             System.IO.Directory.CreateDirectory(_appEnvironment.WebRootPath + path);
-            path += "/" + GetUniqNameInDir(path, uploadedFile.FileName );
-
+            string uniqFileName = GetUniqNameInDir(path, uploadedFile.FileName);
 
             // сохраняем файл в папку Files в каталоге wwwroot
-            using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+            using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path + uniqFileName, FileMode.Create))
             {
                 await uploadedFile.CopyToAsync(fileStream);
             }
+
+            saveAdditionalSizes(_appEnvironment.WebRootPath + path, uniqFileName);
 
             return new FileModel
             {
@@ -59,6 +71,23 @@ namespace FileManager.Areas.Admin.Controllers
                 Creation = DateTime.Now.ToString("yyyyMMdd"),
                 Format = new FileInfo(path).Extension
             };
+        }
+
+        private void saveAdditionalSizes(string imagePath, string imgName)
+        {
+            if (additionalSizes.Count() == 0) 
+                return;
+            var originBm = new Bitmap(imagePath + imgName);
+            foreach (var size in additionalSizes)
+            {
+                new Bitmap(originBm, size.Value)
+                    .Save(
+                        imagePath + 
+                        AddFileNamePostfix(
+                                imgName, "_"+size.Value.Height + "_" + size.Value.Width
+                            )
+                    );
+            }
         }
 
         private string GetUniqNameInDir(string ditPath, string fileName)
@@ -71,10 +100,7 @@ namespace FileManager.Areas.Admin.Controllers
                 ++i;
                 if (System.IO.File.Exists(_appEnvironment.WebRootPath + ditPath + "/" + tmpName))
                 {
-                    tmpName = fileName.Replace(".", $"{i}.");
-                    tmpName = tmpName == fileName //if fileName not containsumbol . (extention)
-                                ? fileName + i
-                                : tmpName;
+                    tmpName = AddFileNamePostfix(fileName, i.ToString());
                 }
                 else
                 {
@@ -83,6 +109,15 @@ namespace FileManager.Areas.Admin.Controllers
                 }
             }
             return fileName;
+        }
+
+        private string AddFileNamePostfix(string fileName, string postfix)
+        {
+            var tmpName = fileName;
+            fileName = fileName.Replace(".", $"{postfix}.");
+            return tmpName == fileName //if fileName not containsumbol . (extention)
+                        ? fileName + postfix
+                        : fileName;
         }
 
         [HttpGet]
